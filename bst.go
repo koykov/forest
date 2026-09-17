@@ -3,8 +3,15 @@ package forest
 import "cmp"
 
 type bst[K cmp.Ordered, V any] struct {
+	root  *nodeBST[K, V]
 	nullK K
 	nullV V
+}
+
+type nodeBST[K cmp.Ordered, V any] struct {
+	key   K
+	left  *nodeBST[K, V]
+	right *nodeBST[K, V]
 }
 
 func NewBST[K cmp.Ordered, V any]() Binary[K, V] {
