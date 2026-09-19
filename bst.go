@@ -75,9 +75,9 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 			switch {
 			case parent == nil:
 				t.root = nil
-			case parent != nil && parent.key < key:
+			case parent.key < key:
 				parent.right = nil
-			case parent != nil && parent.key > key:
+			case parent.key > key:
 				parent.left = nil
 			}
 		case node.left != nil && node.right == nil:
@@ -85,9 +85,9 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 			switch {
 			case parent == nil:
 				t.root = node.left
-			case parent != nil && parent.key < key:
+			case parent.key < key:
 				parent.right = node.left
-			case parent != nil && parent.key > key:
+			case parent.key > key:
 				parent.left = node.left
 			}
 		case node.left == nil && node.right != nil:
@@ -95,9 +95,9 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 			switch {
 			case parent == nil:
 				t.root = node.right
-			case parent != nil && parent.key < key:
+			case parent.key < key:
 				parent.right = node.right
-			case parent != nil && parent.key > key:
+			case parent.key > key:
 				parent.left = node.right
 			}
 		case node.left != nil && node.right != nil:
