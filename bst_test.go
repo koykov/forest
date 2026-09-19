@@ -141,6 +141,11 @@ func TestBST(t *testing.T) {
 				wantOK: true, wantSize: 2, remaining: []int{5, 9}, absent: []int{7},
 			},
 			{
+				name: "delete node with two children", keys: []int{10, 5, 15, 3, 7, 12, 20}, del: 10,
+				wantOK: true, wantSize: 6,
+				remaining: []int{15, 5, 3, 7, 12, 20}, absent: []int{10},
+			},
+			{
 				name: "delete node with two children", keys: []int{10, 5, 15, 3, 7, 12, 20}, del: 15,
 				wantOK: true, wantSize: 6,
 				remaining: []int{10, 5, 3, 7, 12, 20}, absent: []int{15},
