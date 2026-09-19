@@ -64,47 +64,52 @@ func (t *bst[K, V]) Delete(key K) bool {
 		return false
 	}
 	return t.delete(nil, t.root, key)
-	// switch {
-	// case t.root.key == key:
-	// 	t.root = nil
-	// 	t.size--
-	// 	return true
-	// case t.root.key < key && t.root.right != nil:
-	// 	return t.delete(t.root, t.root.right, key)
-	// case t.root.key > key && t.root.left != nil:
-	// 	return t.delete(t.root, t.root.left, key)
-	// }
-	// return false
 }
 
 func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 	switch {
 	case node.key == key:
-		if parent == nil {
-			t.root = nil
-			t.size--
-			return true
-		}
-		ptr := parent.left
-		if parent.key < key {
-			ptr = parent.right
-		}
-		_ = ptr
 		switch {
 		case node.left == nil && node.right == nil:
-			ptr = nil
-		case node.left != nil && node.right == nil:
-			ptr = node.left
-		case node.left == nil && node.right != nil:
-			ptr = node.right
-		case node.left != nil && node.right != nil:
-			successor := node.right
-			for left := successor.left; left != nil; {
-				successor = left
+			// Delete node without children.
+			switch {
+			case parent != nil && parent.key < key:
+				parent.right = nil
+			case parent != nil && parent.key > key:
+				parent.left = nil
 			}
-			successor.left = node.left
-			ptr = node.right
-			// todo finish me
+		case node.left != nil && node.right == nil:
+			// Move left branch upside (overwrite current node).
+			switch {
+			case parent != nil && parent.key < key:
+				parent.right = node.left
+			case parent != nil && parent.key > key:
+				parent.left = node.left
+			}
+		case node.left == nil && node.right != nil:
+			// Move right branch upside (overwrite current node).
+			switch {
+			case parent != nil && parent.key < key:
+				parent.right = node.right
+			case parent != nil && parent.key > key:
+				parent.left = node.right
+			}
+		case node.left != nil && node.right != nil:
+			// Replace current node with successor.
+			z := node
+			s := node.right
+			for {
+				if left := s.left; left != nil {
+					z = s
+					s = left
+					continue
+				}
+				break
+			}
+			if s.right != nil {
+				z.left = s.right
+			}
+			node.key, node.value = s.key, s.value
 		}
 		t.size--
 		return true
