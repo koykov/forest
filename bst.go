@@ -151,13 +151,31 @@ func (t *bst[K, V]) search(node *nodeBST[K, V], key K) (*nodeBST[K, V], bool) {
 }
 
 func (t *bst[K, V]) Min() (K, V, bool) {
-	// todo implement me
-	return t.nullK, t.nullV, false
+	if t.root == nil {
+		return t.nullK, t.nullV, false
+	}
+	node := t.root
+	for {
+		left := node.left
+		if left == nil {
+			return node.key, node.value, true
+		}
+		node = left
+	}
 }
 
 func (t *bst[K, V]) Max() (K, V, bool) {
-	// todo implement me
-	return t.nullK, t.nullV, false
+	if t.root == nil {
+		return t.nullK, t.nullV, false
+	}
+	node := t.root
+	for {
+		left := node.right
+		if left == nil {
+			return node.key, node.value, true
+		}
+		node = left
+	}
 }
 
 func (t *bst[K, V]) Size() int {
