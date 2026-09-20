@@ -73,7 +73,7 @@ func TestBST(t *testing.T) {
 	t.Run("insert", func(t *testing.T) {
 		type tc struct {
 			name     string
-			ops      []int // последовательность вставок
+			ops      []int
 			wantSize int
 		}
 		tests := []tc{
@@ -116,8 +116,8 @@ func TestBST(t *testing.T) {
 			del       int
 			wantOK    bool
 			wantSize  int
-			remaining []int // ключи, которые обязаны остаться
-			absent    []int // ключи, которых быть не должно
+			remaining []int
+			absent    []int
 		}
 		tests := []tc{
 			{
@@ -270,7 +270,6 @@ func TestBST(t *testing.T) {
 			t.Fatal("Min should be empty after Clear")
 		}
 
-		// дерево должно быть переиспользуемо
 		tr.Insert(1, "v1")
 		if v, ok := tr.Search(1); !ok || v != "v1" {
 			t.Fatal("tree not usable after Clear")
@@ -280,7 +279,7 @@ func TestBST(t *testing.T) {
 	t.Run("in-order", func(t *testing.T) {
 		type tc struct {
 			name string
-			ops  []int // вставки, отрицательные значения = удаление по модулю
+			ops  []int
 		}
 		tests := []tc{
 			{"increasing", []int{1, 2, 3, 4, 5}},
