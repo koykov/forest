@@ -104,7 +104,8 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 			// Replace current node with successor.
 			z := node
 			s := node.right
-			for {
+			var i int
+			for ; ; i++ {
 				if left := s.left; left != nil {
 					z = s
 					s = left
@@ -116,6 +117,9 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 				z.left = s.right
 			}
 			node.key, node.value = s.key, s.value
+			if i == 0 {
+				node.right = nil
+			}
 		}
 		t.size--
 		return true
