@@ -132,26 +132,18 @@ func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
 }
 
 func (t *bst[K, V]) Search(key K) (V, bool) {
-	if t.root == nil {
-		return t.nullV, false
+	node := t.root
+	for node != nil {
+		switch {
+		case key == node.key:
+			return node.value, true
+		case key < node.key:
+			node = node.left
+		default:
+			node = node.right
+		}
 	}
-	node, ok := t.search(t.root, key)
-	if !ok {
-		return t.nullV, false
-	}
-	return node.value, true
-}
-
-func (t *bst[K, V]) search(node *nodeBST[K, V], key K) (*nodeBST[K, V], bool) {
-	switch {
-	case node.key == key:
-		return node, true
-	case node.key < key && node.right != nil:
-		return t.search(node.right, key)
-	case node.key > key && node.left != nil:
-		return t.search(node.left, key)
-	}
-	return nil, false
+	return t.nullV, false
 }
 
 func (t *bst[K, V]) Min() (K, V, bool) {
