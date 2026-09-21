@@ -159,13 +159,10 @@ func (t *bst[K, V]) Min() (K, V, bool) {
 		return t.nullK, t.nullV, false
 	}
 	node := t.root
-	for {
-		left := node.left
-		if left == nil {
-			return node.key, node.value, true
-		}
-		node = left
+	for node.left != nil {
+		node = node.left
 	}
+	return node.key, node.value, true
 }
 
 func (t *bst[K, V]) Max() (K, V, bool) {
@@ -173,13 +170,10 @@ func (t *bst[K, V]) Max() (K, V, bool) {
 		return t.nullK, t.nullV, false
 	}
 	node := t.root
-	for {
-		left := node.right
-		if left == nil {
-			return node.key, node.value, true
-		}
-		node = left
+	for node.right != nil {
+		node = node.right
 	}
+	return node.key, node.value, true
 }
 
 func (t *bst[K, V]) Size() int {
