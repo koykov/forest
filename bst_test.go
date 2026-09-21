@@ -309,6 +309,7 @@ func BenchmarkBST(b *testing.B) {
 				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
 					keys := rand.Perm(n)
 					b.ResetTimer()
+					b.ReportAllocs()
 					for i := 0; i < b.N; i++ {
 						tr := NewBST[int, string]()
 						for _, k := range keys {
@@ -322,6 +323,7 @@ func BenchmarkBST(b *testing.B) {
 			for _, n := range sizes {
 				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
 					b.ResetTimer()
+					b.ReportAllocs()
 					for i := 0; i < b.N; i++ {
 						tr := NewBST[int, string]()
 						for k := 0; k < n; k++ {
@@ -343,6 +345,7 @@ func BenchmarkBST(b *testing.B) {
 						tr.Insert(k, "v")
 					}
 					b.ResetTimer()
+					b.ReportAllocs()
 					for i := 0; i < b.N; i++ {
 						tr.Search(keys[i%n])
 					}
@@ -357,6 +360,7 @@ func BenchmarkBST(b *testing.B) {
 						tr.Insert(k*2, "v")
 					}
 					b.ResetTimer()
+					b.ReportAllocs()
 					for i := 0; i < b.N; i++ {
 						tr.Search(i%n*2 + 1)
 					}
@@ -368,6 +372,7 @@ func BenchmarkBST(b *testing.B) {
 	b.Run("delete", func(b *testing.B) {
 		for _, n := range sizes {
 			b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+				b.ReportAllocs()
 				for i := 0; i < b.N; i++ {
 					b.StopTimer()
 					tr := NewBST[int, string]()
@@ -391,6 +396,7 @@ func BenchmarkBST(b *testing.B) {
 			tr.Insert(k, "v")
 		}
 		b.ResetTimer()
+		b.ReportAllocs()
 		for i := 0; i < b.N; i++ {
 			tr.Min()
 			tr.Max()
