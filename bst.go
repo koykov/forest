@@ -22,40 +22,32 @@ func NewBST[K cmp.Ordered, V any]() Binary[K, V] {
 
 func (t *bst[K, V]) Insert(key K, value V) {
 	if t.root == nil {
-		t.root = &nodeBST[K, V]{
-			key:   key,
-			value: value,
-		}
+		t.root = &nodeBST[K, V]{key: key, value: value}
 		t.size++
 		return
 	}
-	t.insert(t.root, key, value)
-}
 
-func (t *bst[K, V]) insert(node *nodeBST[K, V], key K, value V) {
-	switch {
-	case node.key == key:
-		node.value = value
-	case node.key > key:
-		if node.left == nil {
-			node.left = &nodeBST[K, V]{
-				key:   key,
-				value: value,
-			}
-			t.size++
+	node := t.root
+	for {
+		switch {
+		case key == node.key:
+			node.value = value
 			return
-		}
-		t.insert(node.left, key, value)
-	case node.key < key:
-		if node.right == nil {
-			node.right = &nodeBST[K, V]{
-				key:   key,
-				value: value,
+		case key < node.key:
+			if node.left == nil {
+				node.left = &nodeBST[K, V]{key: key, value: value}
+				t.size++
+				return
 			}
-			t.size++
-			return
+			node = node.left
+		default:
+			if node.right == nil {
+				node.right = &nodeBST[K, V]{key: key, value: value}
+				t.size++
+				return
+			}
+			node = node.right
 		}
-		t.insert(node.right, key, value)
 	}
 }
 
