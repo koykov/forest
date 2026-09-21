@@ -6,6 +6,9 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func inorderKeys[K cmp.Ordered, V any](dst []K, n *nodeBST[K, V]) []K {
@@ -34,14 +37,13 @@ func TestBST(t *testing.T) {
 	}
 
 	t.Run("search", func(t *testing.T) {
-		type tc struct {
+		tests := []struct {
 			name    string
 			keys    []int
 			query   int
 			wantVal string
 			wantOK  bool
-		}
-		tests := []tc{
+		}{
 			{"empty tree", nil, 1, "", false},
 			{"single hit", []int{5}, 5, "v5", true},
 			{"single miss smaller", []int{5}, 1, "", false},
@@ -60,24 +62,20 @@ func TestBST(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				tree := newTestBST(t)
 				fill(t, tree, tt.keys...)
+
 				got, ok := tree.Search(tt.query)
-				if ok != tt.wantOK {
-					t.Fatalf("ok = %v, want %v", ok, tt.wantOK)
-				}
-				if got != tt.wantVal {
-					t.Fatalf("value = %q, want %q", got, tt.wantVal)
-				}
+				require.Equal(t, tt.wantOK, ok)
+				assert.Equal(t, tt.wantVal, got)
 			})
 		}
 	})
 
 	t.Run("insert", func(t *testing.T) {
-		type tc struct {
+		tests := []struct {
 			name     string
 			ops      []int
 			wantSize int
-		}
-		tests := []tc{
+		}{
 			{"empty", nil, 0},
 			{"one", []int{5}, 1},
 			{"two distinct", []int{5, 3}, 2},
@@ -89,9 +87,7 @@ func TestBST(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				tr := newTestBST(t)
 				fill(t, tr, tt.ops...)
-				if got := tr.Size(); got != tt.wantSize {
-					t.Fatalf("Size = %d, want %d", got, tt.wantSize)
-				}
+				assert.Equal(t, tt.wantSize, tr.Size())
 			})
 		}
 	})
@@ -101,17 +97,14 @@ func TestBST(t *testing.T) {
 		tr.Insert(5, "first")
 		tr.Insert(5, "second")
 
-		if got := tr.Size(); got != 1 {
-			t.Fatalf("Size = %d, want 1", got)
-		}
+		require.Equal(t, 1, tr.Size())
 		v, ok := tr.Search(5)
-		if !ok || v != "second" {
-			t.Fatalf("Search = (%q, %v), want (\"second\", true)", v, ok)
-		}
+		require.True(t, ok)
+		assert.Equal(t, "second", v)
 	})
 
 	t.Run("delete", func(t *testing.T) {
-		type tc struct {
+		tests := []struct {
 			name      string
 			keys      []int
 			del       int
@@ -119,8 +112,7 @@ func TestBST(t *testing.T) {
 			wantSize  int
 			remaining []int
 			absent    []int
-		}
-		tests := []tc{
+		}{
 			{
 				name: "empty tree", keys: nil, del: 1,
 				wantOK: false, wantSize: 0,
@@ -147,7 +139,7 @@ func TestBST(t *testing.T) {
 				remaining: []int{15, 5, 3, 7, 12, 20}, absent: []int{10},
 			},
 			{
-				name: "delete node with two children", keys: []int{10, 5, 15, 3, 7, 12, 20}, del: 15,
+				name: "delete node with two children (non-root)", keys: []int{10, 5, 15, 3, 7, 12, 20}, del: 15,
 				wantOK: true, wantSize: 6,
 				remaining: []int{10, 5, 3, 7, 12, 20}, absent: []int{15},
 			},
@@ -177,21 +169,17 @@ func TestBST(t *testing.T) {
 				tr := newTestBST(t)
 				fill(t, tr, tt.keys...)
 
-				if ok := tr.Delete(tt.del); ok != tt.wantOK {
-					t.Fatalf("Delete ok = %v, want %v", ok, tt.wantOK)
-				}
-				if got := tr.Size(); got != tt.wantSize {
-					t.Fatalf("Size = %d, want %d", got, tt.wantSize)
-				}
+				ok := tr.Delete(tt.del)
+				require.Equal(t, tt.wantOK, ok, "Delete ok")
+				require.Equal(t, tt.wantSize, tr.Size(), "Size after delete")
+
 				for _, k := range tt.remaining {
-					if _, ok := tr.Search(k); !ok {
-						t.Fatalf("key %d should remain", k)
-					}
+					_, found := tr.Search(k)
+					assert.Truef(t, found, "key %d should remain", k)
 				}
 				for _, k := range tt.absent {
-					if _, ok := tr.Search(k); ok {
-						t.Fatalf("key %d should be absent", k)
-					}
+					_, found := tr.Search(k)
+					assert.Falsef(t, found, "key %d should be absent", k)
 				}
 			})
 		}
@@ -200,26 +188,20 @@ func TestBST(t *testing.T) {
 	t.Run("delete twice", func(t *testing.T) {
 		tr := newTestBST(t)
 		fill(t, tr, 5, 3, 7)
-		if !tr.Delete(3) {
-			t.Fatal("first delete should succeed")
-		}
-		if tr.Delete(3) {
-			t.Fatal("second delete should fail")
-		}
-		if tr.Size() != 2 {
-			t.Fatalf("Size = %d, want 2", tr.Size())
-		}
+
+		require.True(t, tr.Delete(3), "first delete should succeed")
+		require.False(t, tr.Delete(3), "second delete should fail")
+		assert.Equal(t, 2, tr.Size())
 	})
 
 	t.Run("min max", func(t *testing.T) {
-		type tc struct {
+		tests := []struct {
 			name    string
 			keys    []int
 			wantMin int
 			wantMax int
 			empty   bool
-		}
-		tests := []tc{
+		}{
 			{"empty", nil, 0, 0, true},
 			{"single", []int{5}, 5, 5, false},
 			{"left chain", []int{5, 4, 3, 2, 1}, 1, 5, false},
@@ -233,24 +215,16 @@ func TestBST(t *testing.T) {
 				fill(t, tr, tt.keys...)
 
 				k, v, ok := tr.Min()
-				if ok == tt.empty {
-					t.Fatalf("Min ok = %v, want empty=%v", ok, tt.empty)
-				}
+				require.Equal(t, !tt.empty, ok, "Min ok")
 				if !tt.empty {
-					if k != tt.wantMin {
-						t.Fatalf("Min key = %d, want %d", k, tt.wantMin)
-					}
-					if v != fmt.Sprintf("v%d", tt.wantMin) {
-						t.Fatalf("Min val = %q", v)
-					}
+					assert.Equal(t, tt.wantMin, k, "Min key")
+					assert.Equal(t, fmt.Sprintf("v%d", tt.wantMin), v, "Min value")
 				}
 
 				k, _, ok = tr.Max()
-				if ok == tt.empty {
-					t.Fatalf("Max ok = %v, want empty=%v", ok, tt.empty)
-				}
-				if !tt.empty && k != tt.wantMax {
-					t.Fatalf("Max key = %d, want %d", k, tt.wantMax)
+				require.Equal(t, !tt.empty, ok, "Max ok")
+				if !tt.empty {
+					assert.Equal(t, tt.wantMax, k, "Max key")
 				}
 			})
 		}
@@ -261,28 +235,23 @@ func TestBST(t *testing.T) {
 		fill(t, tr, 5, 3, 7)
 		tr.Clear()
 
-		if tr.Size() != 0 {
-			t.Fatalf("Size = %d, want 0", tr.Size())
-		}
-		if _, ok := tr.Search(5); ok {
-			t.Fatal("Search should miss after Clear")
-		}
-		if _, _, ok := tr.Min(); ok {
-			t.Fatal("Min should be empty after Clear")
-		}
+		require.Equal(t, 0, tr.Size())
+		_, ok := tr.Search(5)
+		assert.False(t, ok, "Search should miss after Clear")
+		_, _, ok = tr.Min()
+		assert.False(t, ok, "Min should be empty after Clear")
 
 		tr.Insert(1, "v1")
-		if v, ok := tr.Search(1); !ok || v != "v1" {
-			t.Fatal("tree not usable after Clear")
-		}
+		v, ok := tr.Search(1)
+		require.True(t, ok, "tree not usable after Clear")
+		assert.Equal(t, "v1", v)
 	})
 
 	t.Run("in-order", func(t *testing.T) {
-		type tc struct {
+		tests := []struct {
 			name string
 			ops  []int
-		}
-		tests := []tc{
+		}{
 			{"increasing", []int{1, 2, 3, 4, 5}},
 			{"decreasing", []int{5, 4, 3, 2, 1}},
 			{"zigzag", []int{5, 1, 4, 2, 3}},
@@ -302,9 +271,7 @@ func TestBST(t *testing.T) {
 				tree := tr.(*bst[int, string])
 				keys := inorderKeys(nil, tree.root)
 				for i := 1; i < len(keys); i++ {
-					if keys[i-1] >= keys[i] {
-						t.Fatalf("order broken at %d: %v", i, keys)
-					}
+					require.Lessf(t, keys[i-1], keys[i], "order broken at %d: %v", i, keys)
 				}
 			})
 		}
@@ -328,9 +295,7 @@ func TestBST(t *testing.T) {
 			results = append(results, strings.Join(got, ","))
 		}
 		for i := 1; i < len(results); i++ {
-			if results[i] != results[0] {
-				t.Fatalf("permutation %d gives %q, want %q", i, results[i], results[0])
-			}
+			assert.Equalf(t, results[0], results[i], "permutation %d", i)
 		}
 	})
 }
