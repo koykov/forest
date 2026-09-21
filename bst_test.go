@@ -8,13 +8,14 @@ import (
 	"testing"
 )
 
-func inorderKeys[K cmp.Ordered, V any](n *nodeBST[K, V], acc *[]K) {
+func inorderKeys[K cmp.Ordered, V any](dst []K, n *nodeBST[K, V]) []K {
 	if n == nil {
-		return
+		return dst
 	}
-	inorderKeys(n.left, acc)
-	*acc = append(*acc, n.key)
-	inorderKeys(n.right, acc)
+	dst = inorderKeys(dst, n.left)
+	dst = append(dst, n.key)
+	dst = inorderKeys(dst, n.right)
+	return dst
 }
 
 func TestBST(t *testing.T) {
@@ -299,8 +300,7 @@ func TestBST(t *testing.T) {
 					}
 				}
 				tree := tr.(*bst[int, string])
-				var keys []int
-				inorderKeys(tree.root, &keys)
+				keys := inorderKeys(nil, tree.root)
 				for i := 1; i < len(keys); i++ {
 					if keys[i-1] >= keys[i] {
 						t.Fatalf("order broken at %d: %v", i, keys)
