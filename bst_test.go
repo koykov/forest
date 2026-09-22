@@ -302,8 +302,7 @@ func TestBST(t *testing.T) {
 }
 
 func BenchmarkBST(b *testing.B) {
-	// sizes := []int{100, 1_000, 10_000, 100_000}
-	sizes := []int{100_000}
+	sizes := []int{100, 1_000, 10_000, 100_000}
 
 	b.Run("insert", func(b *testing.B) {
 		b.Run("random", func(b *testing.B) {
