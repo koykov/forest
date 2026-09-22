@@ -52,75 +52,66 @@ func (t *bst[K, V]) Insert(key K, value V) {
 }
 
 func (t *bst[K, V]) Delete(key K) bool {
-	if t.root == nil {
+	var parent *nodeBST[K, V]
+	node := t.root
+
+	for node != nil && node.key != key {
+		parent = node
+		if key < node.key {
+			node = node.left
+		} else {
+			node = node.right
+		}
+	}
+	if node == nil {
 		return false
 	}
-	return t.delete(nil, t.root, key)
+
+	switch {
+	case node.left == nil && node.right == nil:
+		t.replace(parent, node, nil)
+	case node.left == nil && node.right != nil:
+		t.replace(parent, node, node.right)
+	case node.left != nil && node.right == nil:
+		t.replace(parent, node, node.left)
+	default:
+		t.delete2C(node)
+	}
+	t.size--
+	return true
 }
 
-func (t *bst[K, V]) delete(parent, node *nodeBST[K, V], key K) bool {
-	switch {
-	case node.key == key:
-		switch {
-		case node.left == nil && node.right == nil:
-			// Delete node without children.
-			switch {
-			case parent == nil:
-				t.root = nil
-			case parent.key < key:
-				parent.right = nil
-			case parent.key > key:
-				parent.left = nil
-			}
-		case node.left != nil && node.right == nil:
-			// Move left branch upside (overwrite current node).
-			switch {
-			case parent == nil:
-				t.root = node.left
-			case parent.key < key:
-				parent.right = node.left
-			case parent.key > key:
-				parent.left = node.left
-			}
-		case node.left == nil && node.right != nil:
-			// Move right branch upside (overwrite current node).
-			switch {
-			case parent == nil:
-				t.root = node.right
-			case parent.key < key:
-				parent.right = node.right
-			case parent.key > key:
-				parent.left = node.right
-			}
-		case node.left != nil && node.right != nil:
-			// Replace current node with successor.
-			z := node
-			s := node.right
-			var i int
-			for ; ; i++ {
-				if left := s.left; left != nil {
-					z = s
-					s = left
-					continue
-				}
-				break
-			}
-			if s.right != nil {
-				z.left = s.right
-			}
-			node.key, node.value = s.key, s.value
-			if i == 0 {
-				node.right = nil
-			}
-		}
-		t.size--
-		return true
-	case node.key < key && node.right != nil:
-		return t.delete(node, node.right, key)
-	case node.key > key && node.left != nil:
-		return t.delete(node, node.left, key)
+// replace swaps child into parent's slot (or into root when parent is nil).
+func (t *bst[K, V]) replace(parent, child, with *nodeBST[K, V]) {
+	if parent == nil {
+		t.root = with
+		return
 	}
-	return false
+	if parent.left == child {
+		parent.left = with
+	} else {
+		parent.right = with
+	}
+}
+
+// delete2C replaces node's key/value with its in-order successor's key/value, then removes the successor node,
+// that has at most one child (its right subtree).
+func (t *bst[K, V]) delete2C(node *nodeBST[K, V]) {
+	var parent *nodeBST[K, V]
+	succ := node.right
+	for succ.left != nil {
+		parent = succ
+		succ = succ.left
+	}
+
+	node.key, node.value = succ.key, succ.value
+
+	if parent == nil {
+		// Successor is node.right itself.
+		node.right = succ.right
+	} else {
+		parent.left = succ.right
+	}
 }
 
 func (t *bst[K, V]) Search(key K) (V, bool) {
