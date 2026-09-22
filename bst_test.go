@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -301,17 +302,19 @@ func TestBST(t *testing.T) {
 }
 
 func BenchmarkBST(b *testing.B) {
-	sizes := []int{100, 1_000, 10_000, 100_000}
+	// sizes := []int{100, 1_000, 10_000, 100_000}
+	sizes := []int{100_000}
 
 	b.Run("insert", func(b *testing.B) {
 		b.Run("random", func(b *testing.B) {
 			for _, n := range sizes {
-				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+				b.Run(strconv.Itoa(n), func(b *testing.B) {
 					keys := rand.Perm(n)
 					b.ResetTimer()
 					b.ReportAllocs()
+					tr := NewBST[int, string](WithSize(uint64(n)))
 					for i := 0; i < b.N; i++ {
-						tr := NewBST[int, string]()
+						tr.Clear()
 						for _, k := range keys {
 							tr.Insert(k, "v")
 						}
@@ -321,11 +324,12 @@ func BenchmarkBST(b *testing.B) {
 		})
 		b.Run("sort", func(b *testing.B) {
 			for _, n := range sizes {
-				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+				b.Run(strconv.Itoa(n), func(b *testing.B) {
 					b.ResetTimer()
 					b.ReportAllocs()
+					tr := NewBST[int, string](WithSize(uint64(n)))
 					for i := 0; i < b.N; i++ {
-						tr := NewBST[int, string]()
+						tr.Clear()
 						for k := 0; k < n; k++ {
 							tr.Insert(k, "v")
 						}
@@ -338,8 +342,8 @@ func BenchmarkBST(b *testing.B) {
 	b.Run("search", func(b *testing.B) {
 		b.Run("hit", func(b *testing.B) {
 			for _, n := range sizes {
-				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
-					tr := NewBST[int, string]()
+				b.Run(strconv.Itoa(n), func(b *testing.B) {
+					tr := NewBST[int, string](WithSize(uint64(n)))
 					keys := rand.Perm(n)
 					for _, k := range keys {
 						tr.Insert(k, "v")
@@ -354,8 +358,8 @@ func BenchmarkBST(b *testing.B) {
 		})
 		b.Run("miss", func(b *testing.B) {
 			for _, n := range sizes {
-				b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
-					tr := NewBST[int, string]()
+				b.Run(strconv.Itoa(n), func(b *testing.B) {
+					tr := NewBST[int, string](WithSize(uint64(n)))
 					for k := 0; k < n; k++ {
 						tr.Insert(k*2, "v")
 					}
@@ -371,11 +375,12 @@ func BenchmarkBST(b *testing.B) {
 
 	b.Run("delete", func(b *testing.B) {
 		for _, n := range sizes {
-			b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			b.Run(strconv.Itoa(n), func(b *testing.B) {
 				b.ReportAllocs()
+				tr := NewBST[int, string](WithSize(uint64(n)))
 				for i := 0; i < b.N; i++ {
 					b.StopTimer()
-					tr := NewBST[int, string]()
+					tr.Clear()
 					keys := rand.Perm(n)
 					for _, k := range keys {
 						tr.Insert(k, "v")
@@ -391,7 +396,7 @@ func BenchmarkBST(b *testing.B) {
 
 	b.Run("min max", func(b *testing.B) {
 		const n = 10_000
-		tr := NewBST[int, string]()
+		tr := NewBST[int, string](WithSize(n))
 		for _, k := range rand.Perm(n) {
 			tr.Insert(k, "v")
 		}

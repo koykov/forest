@@ -3,6 +3,10 @@ package forest
 import "cmp"
 
 type bst[K cmp.Ordered, V any] struct {
+	options
+	buf []nodeBST[K, V]
+	off int
+
 	root  *nodeBST[K, V]
 	size  int
 	nullK K
@@ -16,13 +20,16 @@ type nodeBST[K cmp.Ordered, V any] struct {
 	right *nodeBST[K, V]
 }
 
-func NewBST[K cmp.Ordered, V any]() Binary[K, V] {
-	return &bst[K, V]{}
+func NewBST[K cmp.Ordered, V any](options ...Option) Binary[K, V] {
+	t := &bst[K, V]{}
+	t.apply(options...)
+	t.buf = make([]nodeBST[K, V], t.options.size)
+	return t
 }
 
 func (t *bst[K, V]) Insert(key K, value V) {
 	if t.root == nil {
-		t.root = &nodeBST[K, V]{key: key, value: value}
+		t.root = t.alloc(key, value)
 		t.size++
 		return
 	}
@@ -35,14 +42,14 @@ func (t *bst[K, V]) Insert(key K, value V) {
 			return
 		case key < node.key:
 			if node.left == nil {
-				node.left = &nodeBST[K, V]{key: key, value: value}
+				node.left = t.alloc(key, value)
 				t.size++
 				return
 			}
 			node = node.left
 		default:
 			if node.right == nil {
-				node.right = &nodeBST[K, V]{key: key, value: value}
+				node.right = t.alloc(key, value)
 				t.size++
 				return
 			}
@@ -158,4 +165,20 @@ func (t *bst[K, V]) Size() int {
 func (t *bst[K, V]) Clear() {
 	t.root = nil
 	t.size = 0
+	t.off = 0
+}
+
+func (t *bst[K, V]) alloc(key K, value V) (n *nodeBST[K, V]) {
+	if t.off < len(t.buf) {
+		n = &t.buf[t.off]
+	} else {
+		t.buf = append(t.buf, nodeBST[K, V]{})
+		n = &t.buf[len(t.buf)-1]
+	}
+	t.off++
+	n.key = key
+	n.value = value
+	n.left = nil
+	n.right = nil
+	return
 }
