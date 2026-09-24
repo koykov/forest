@@ -29,7 +29,74 @@ func NewAVL[K cmp.Ordered, V any](options ...Option) Binary[K, V] {
 }
 
 func (t *avl[K, V]) Insert(key K, value V) {
-	// todo implement me
+	if t.root == nil {
+		t.root = t.alloc(key, value)
+		t.size++
+		return
+	}
+	t.insert(t.root, key, value)
+}
+
+func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
+	switch {
+	case key == node.key:
+		node.value = value
+		return
+	case key < node.key:
+		if node.left == nil {
+			node.left = t.alloc(key, value)
+			t.size++
+			return
+		}
+		t.insert(node.left, key, value)
+	default:
+		if node.right == nil {
+			node.right = t.alloc(key, value)
+			t.size++
+			return
+		}
+		t.insert(node.right, key, value)
+	}
+
+	// Update height.
+	node.height = max(t.hOf(node.left), t.hOf(node.right)) + 1
+
+	// Check balance factor.
+	bf := t.bfOf(node)
+	switch {
+	case bf > -2 && bf < 2:
+		// Subtree is balanced, do nothing.
+		return
+	case bf > 1 && key < node.left.key:
+		// todo implement LL
+	case bf > 1 && key > node.left.key:
+		// todo implement LR
+	case bf < -1 && key > node.right.key:
+		// todo implement RR
+	case bf < -1 && key < node.right.key:
+		// todo implement RL
+	}
+}
+
+func (t *avl[K, V]) bfOf(node *nodeAVL[K, V]) int {
+	if node == nil {
+		return 0
+	}
+	var hl, hr int
+	if node.left != nil {
+		hl = node.left.height
+	}
+	if node.right != nil {
+		hr = node.right.height
+	}
+	return hl - hr
+}
+
+func (t *avl[K, V]) hOf(node *nodeAVL[K, V]) int {
+	if node == nil {
+		return 0
+	}
+	return node.height
 }
 
 func (t *avl[K, V]) Delete(key K) bool {
@@ -82,4 +149,20 @@ func (t *avl[K, V]) Clear() {
 	t.root = nil
 	t.size = 0
 	t.off = 0
+}
+
+func (t *avl[K, V]) alloc(key K, value V) (n *nodeAVL[K, V]) {
+	if t.off < len(t.buf) {
+		n = &t.buf[t.off]
+	} else {
+		t.buf = append(t.buf, nodeAVL[K, V]{})
+		n = &t.buf[len(t.buf)-1]
+	}
+	t.off++
+	n.height = 0
+	n.key = key
+	n.value = value
+	n.left = nil
+	n.right = nil
+	return
 }
