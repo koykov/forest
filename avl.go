@@ -67,15 +67,41 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
 	case bf > -2 && bf < 2:
 		// Subtree is balanced, do nothing.
 		return
-	case bf > 1 && key < node.left.key:
-		// todo implement LL
-	case bf > 1 && key > node.left.key:
-		// todo implement LR
-	case bf < -1 && key > node.right.key:
-		// todo implement RR
-	case bf < -1 && key < node.right.key:
-		// todo implement RL
+	case bf > 1 && key < node.left.key: // LL
+		t.rotr(node)
+	case bf > 1 && key > node.left.key: // LR
+		t.rotl(node.left)
+		t.rotr(node)
+	case bf < -1 && key > node.right.key: // RR
+		t.rotl(node)
+	case bf < -1 && key < node.right.key: // RL
+		t.rotr(node.right)
+		t.rotl(node)
 	}
+}
+
+func (t *avl[K, V]) rotl(x *nodeAVL[K, V]) *nodeAVL[K, V] {
+	y := x.right
+
+	x.right = y.left
+	y.left = x
+
+	x.height = max(t.hOf(x.left), t.hOf(x.right)) + 1
+	y.height = max(t.hOf(y.left), t.hOf(y.right)) + 1
+
+	return y
+}
+
+func (t *avl[K, V]) rotr(x *nodeAVL[K, V]) *nodeAVL[K, V] {
+	y := x.left
+
+	x.left = y.right
+	y.right = x
+
+	x.height = max(t.hOf(x.left), t.hOf(x.right)) + 1
+	y.height = max(t.hOf(y.left), t.hOf(y.right)) + 1
+
+	return y
 }
 
 func (t *avl[K, V]) bfOf(node *nodeAVL[K, V]) int {
