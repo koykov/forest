@@ -45,6 +45,7 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
 	case key < node.key:
 		if node.left == nil {
 			node.left = t.alloc(key, value)
+			node.height++
 			t.size++
 			return
 		}
@@ -52,6 +53,7 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
 	default:
 		if node.right == nil {
 			node.right = t.alloc(key, value)
+			node.height++
 			t.size++
 			return
 		}
