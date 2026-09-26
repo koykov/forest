@@ -34,20 +34,20 @@ func (t *avl[K, V]) Insert(key K, value V) {
 		t.size++
 		return
 	}
-	t.insert(t.root, key, value)
+	t.root = t.insert(t.root, key, value)
 }
 
-func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
+func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) *nodeAVL[K, V] {
 	switch {
 	case key == node.key:
 		node.value = value
-		return
+		return node
 	case key < node.key:
 		if node.left == nil {
 			node.left = t.alloc(key, value)
 			node.height++
 			t.size++
-			return
+			return node
 		}
 		t.insert(node.left, key, value)
 	default:
@@ -55,7 +55,7 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
 			node.right = t.alloc(key, value)
 			node.height++
 			t.size++
-			return
+			return node
 		}
 		t.insert(node.right, key, value)
 	}
@@ -68,18 +68,19 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) {
 	switch {
 	case bf > -2 && bf < 2:
 		// Subtree is balanced, do nothing.
-		return
+		return node
 	case bf > 1 && key < node.left.key: // LL
-		t.rotr(node)
+		return t.rotr(node)
 	case bf > 1 && key > node.left.key: // LR
 		t.rotl(node.left)
-		t.rotr(node)
+		return t.rotr(node)
 	case bf < -1 && key > node.right.key: // RR
-		t.rotl(node)
+		return t.rotl(node)
 	case bf < -1 && key < node.right.key: // RL
 		t.rotr(node.right)
-		t.rotl(node)
+		return t.rotl(node)
 	}
+	return node
 }
 
 func (t *avl[K, V]) rotl(x *nodeAVL[K, V]) *nodeAVL[K, V] {

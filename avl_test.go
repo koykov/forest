@@ -205,10 +205,10 @@ func TestAVL(t *testing.T) {
 		}{
 			// {"empty", nil, 0, 0, true},
 			// {"single", []int{5}, 5, 5, false},
-			{"left chain", []int{5, 4, 3, 2, 1}, 1, 5, false},
-			{"right chain", []int{1, 2, 3, 4, 5}, 1, 5, false},
-			// {"balanced", []int{10, 5, 15, 3, 7, 12, 20}, 3, 20, false},
-			// {"after deletes", []int{10, 5, 15, 3, 7}, 3, 15, false},
+			// {"left chain", []int{5, 4, 3, 2, 1}, 1, 5, false},
+			// {"right chain", []int{1, 2, 3, 4, 5}, 1, 5, false},
+			{"balanced", []int{10, 5, 15, 3, 7, 12, 20}, 3, 20, false},
+			{"after deletes", []int{10, 5, 15, 3, 7}, 3, 15, false},
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
