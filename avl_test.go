@@ -203,10 +203,10 @@ func TestAVL(t *testing.T) {
 			wantMax int
 			empty   bool
 		}{
-			// {"empty", nil, 0, 0, true},
-			// {"single", []int{5}, 5, 5, false},
-			// {"left chain", []int{5, 4, 3, 2, 1}, 1, 5, false},
-			// {"right chain", []int{1, 2, 3, 4, 5}, 1, 5, false},
+			{"empty", nil, 0, 0, true},
+			{"single", []int{5}, 5, 5, false},
+			{"left chain", []int{5, 4, 3, 2, 1}, 1, 5, false},
+			{"right chain", []int{1, 2, 3, 4, 5}, 1, 5, false},
 			{"balanced", []int{10, 5, 15, 3, 7, 12, 20}, 3, 20, false},
 			{"after deletes", []int{10, 5, 15, 3, 7}, 3, 15, false},
 		}
@@ -355,7 +355,7 @@ func TestAVL(t *testing.T) {
 				tr := newTestAVL(t)
 				fill(t, tr, tt.keys...)
 				tree := tr.(*avl[int, string])
-				assert.LessOrEqual(t, tree.root.height, tt.maxHeight)
+				assert.LessOrEqual(t, tree.height(), tt.maxHeight)
 			})
 		}
 	})

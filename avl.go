@@ -180,6 +180,13 @@ func (t *avl[K, V]) Clear() {
 	t.off = 0
 }
 
+func (t *avl[K, V]) height() int {
+	if t.root != nil {
+		return t.root.height
+	}
+	return 0
+}
+
 func (t *avl[K, V]) alloc(key K, value V) (n *nodeAVL[K, V]) {
 	if t.off < len(t.buf) {
 		n = &t.buf[t.off]
