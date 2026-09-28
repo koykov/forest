@@ -122,9 +122,66 @@ func (t *avl[K, V]) hOf(node *nodeAVL[K, V]) int {
 	return node.height
 }
 
-func (t *avl[K, V]) Delete(key K) bool {
-	// todo implement me
-	return false
+func (t *avl[K, V]) Delete(key K) (ok bool) {
+	if t.root == nil {
+		return
+	}
+	t.root, ok = t.delete(t.root, key)
+	return
+}
+
+func (t *avl[K, V]) delete(node *nodeAVL[K, V], key K) (*nodeAVL[K, V], bool) {
+	if node == nil {
+		return nil, false
+	}
+	var ok bool
+	switch {
+	case key < node.key:
+		node.left, ok = t.delete(node.left, key)
+	case key > node.key:
+		node.right, ok = t.delete(node.right, key)
+	default:
+		ok = true
+		switch {
+		case node.left == nil:
+			return node.right, ok
+		case node.right == nil:
+			return node.left, ok
+		default:
+			succ := node.right
+			for succ.left != nil {
+				succ = succ.left
+			}
+			node.key, node.value = succ.key, succ.value
+			node.right, _ = t.delete(node.right, succ.key)
+		}
+	}
+	if !ok {
+		return node, false
+	}
+
+	// Update height.
+	node.height = max(t.hOf(node.left), t.hOf(node.right)) + 1
+
+	// Check balance factor.
+	bf := t.bfOf(node)
+	switch {
+	case bf > -2 && bf < 2:
+		// Subtree is balanced, do nothing.
+		return node, ok
+	case bf > 1 && key < node.left.key: // LL
+		return t.rotr(node), ok
+	case bf > 1 && key > node.left.key: // LR
+		node.left = t.rotl(node.left)
+		return t.rotr(node), ok
+	case bf < -1 && key > node.right.key: // RR
+		return t.rotl(node), ok
+	case bf < -1 && key < node.right.key: // RL
+		node.right = t.rotr(node.right)
+		return t.rotl(node), ok
+	}
+
+	return nil, false
 }
 
 func (t *avl[K, V]) Search(key K) (V, bool) {
