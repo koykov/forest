@@ -126,7 +126,9 @@ func (t *avl[K, V]) Delete(key K) (ok bool) {
 	if t.root == nil {
 		return
 	}
-	t.root, ok = t.delete(t.root, key)
+	if t.root, ok = t.delete(t.root, key); ok {
+		t.size--
+	}
 	return
 }
 
