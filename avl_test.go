@@ -366,19 +366,19 @@ func TestAVL(t *testing.T) {
 			{1, 4, 6, 8, 3, 7, 5},
 			{8, 6, 4, 1, 7, 3, 5},
 		}
-		var results []string
+		expected := "v1,v3,v4,v5,v6,v7,v8"
 		for _, keys := range permutations {
-			tr := newTestAVL(t)
-			fill(t, tr, keys...)
-			var got []string
-			for _, k := range []int{1, 3, 4, 5, 6, 7, 8} {
-				v, _ := tr.Search(k)
-				got = append(got, v)
-			}
-			results = append(results, strings.Join(got, ","))
-		}
-		for i := 1; i < len(results); i++ {
-			assert.Equalf(t, results[0], results[i], "permutation %d", i)
+			t.Run("", func(t *testing.T) {
+				tr := newTestAVL(t)
+				fill(t, tr, keys...)
+				var got []string
+				for _, k := range []int{1, 3, 4, 5, 6, 7, 8} {
+					v, _ := tr.Search(k)
+					got = append(got, v)
+				}
+				assert.Equal(t, expected, strings.Join(got, ","))
+			})
+
 		}
 	})
 }

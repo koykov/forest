@@ -35,6 +35,7 @@ func (t *avl[K, V]) Insert(key K, value V) {
 		return
 	}
 	t.root = t.insert(t.root, key, value)
+	t.root.height = max(t.hOf(t.root.left), t.hOf(t.root.right)) + 1
 }
 
 func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) *nodeAVL[K, V] {
@@ -45,6 +46,7 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) *nodeAVL[K, V] {
 	case key < node.key:
 		if node.left == nil {
 			node.left = t.alloc(key, value)
+			node.height = max(t.hOf(node.left), t.hOf(node.right)) + 1
 			t.size++
 			return node
 		}
@@ -52,6 +54,7 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) *nodeAVL[K, V] {
 	default:
 		if node.right == nil {
 			node.right = t.alloc(key, value)
+			node.height = max(t.hOf(node.left), t.hOf(node.right)) + 1
 			t.size++
 			return node
 		}
@@ -70,12 +73,12 @@ func (t *avl[K, V]) insert(node *nodeAVL[K, V], key K, value V) *nodeAVL[K, V] {
 	case bf > 1 && key < node.left.key: // LL
 		return t.rotr(node)
 	case bf > 1 && key > node.left.key: // LR
-		t.rotl(node.left)
+		node.left = t.rotl(node.left)
 		return t.rotr(node)
 	case bf < -1 && key > node.right.key: // RR
 		return t.rotl(node)
 	case bf < -1 && key < node.right.key: // RL
-		t.rotr(node.right)
+		node.right = t.rotr(node.right)
 		return t.rotl(node)
 	}
 	return node
@@ -109,19 +112,12 @@ func (t *avl[K, V]) bfOf(node *nodeAVL[K, V]) int {
 	if node == nil {
 		return 0
 	}
-	var hl, hr int
-	if node.left != nil {
-		hl = node.left.height
-	}
-	if node.right != nil {
-		hr = node.right.height
-	}
-	return hl - hr
+	return t.hOf(node.left) - t.hOf(node.right)
 }
 
 func (t *avl[K, V]) hOf(node *nodeAVL[K, V]) int {
 	if node == nil {
-		return 0
+		return -1
 	}
 	return node.height
 }
