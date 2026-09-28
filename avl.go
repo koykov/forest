@@ -168,22 +168,23 @@ func (t *avl[K, V]) delete(node *nodeAVL[K, V], key K) (*nodeAVL[K, V], bool) {
 	// Check balance factor.
 	bf := t.bfOf(node)
 	switch {
-	case bf > -2 && bf < 2:
-		// Subtree is balanced, do nothing.
-		return node, ok
-	case bf > 1 && key < node.left.key: // LL
-		return t.rotr(node), ok
-	case bf > 1 && key > node.left.key: // LR
-		node.left = t.rotl(node.left)
-		return t.rotr(node), ok
-	case bf < -1 && key > node.right.key: // RR
-		return t.rotl(node), ok
-	case bf < -1 && key < node.right.key: // RL
-		node.right = t.rotr(node.right)
-		return t.rotl(node), ok
+	case bf > 1:
+		if t.bfOf(node.left) >= 0 {
+			return t.rotr(node), ok
+		} else {
+			node.left = t.rotl(node.left)
+			return t.rotr(node), ok
+		}
+	case bf < -1:
+		if t.bfOf(node.right) <= 0 {
+			return t.rotl(node), ok
+		} else {
+			node.right = t.rotr(node.right)
+			return t.rotl(node), ok
+		}
 	}
 
-	return nil, false
+	return node, ok
 }
 
 func (t *avl[K, V]) Search(key K) (V, bool) {
