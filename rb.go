@@ -2,6 +2,11 @@ package forest
 
 import "cmp"
 
+const (
+	rbBlack uint8 = iota
+	rbRed
+)
+
 type rb[K cmp.Ordered, V any] struct {
 	options
 	buf []nodeRB[K, V]
@@ -16,6 +21,7 @@ type rb[K cmp.Ordered, V any] struct {
 type nodeRB[K cmp.Ordered, V any] struct {
 	key    K
 	value  V
+	color  uint8
 	parent *nodeRB[K, V]
 	left   *nodeRB[K, V]
 	right  *nodeRB[K, V]
