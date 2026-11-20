@@ -48,6 +48,62 @@ func (t *rb[K, V]) insert(node *nodeRB[K, V], key K, value V) *nodeRB[K, V] {
 	return nil
 }
 
+func (t *rb[K, V]) grandparent(node *nodeRB[K, V]) *nodeRB[K, V] {
+	if node.parent != nil && node.parent.parent != nil {
+		return node.parent.parent
+	}
+	return nil
+}
+
+func (t *rb[K, V]) uncle(node *nodeRB[K, V]) *nodeRB[K, V] {
+	gp := t.grandparent(node)
+	if gp == nil {
+		return nil
+	}
+	if node.parent == gp.left {
+		return gp.right
+	}
+	return gp.left
+}
+
+func (t *rb[K, V]) rotl(node *nodeRB[K, V]) {
+	if node.right == nil {
+		return
+	}
+	pivot := node.right
+	if pivot.parent = node.parent; node.parent != nil {
+		if node.parent.left == node {
+			node.parent.left = pivot
+		} else {
+			node.parent.right = pivot
+		}
+	}
+	if node.right = pivot.left; pivot.left != nil {
+		pivot.left.parent = node
+	}
+	node.parent = pivot
+	pivot.left = node
+}
+
+func (t *rb[K, V]) rotr(node *nodeRB[K, V]) {
+	if node.left == nil {
+		return
+	}
+	pivot := node.left
+	if pivot.parent = node.parent; node.parent != nil {
+		if node.parent.left == node {
+			node.parent.left = pivot
+		} else {
+			node.parent.right = pivot
+		}
+	}
+	if node.left = pivot.right; pivot.right != nil {
+		pivot.right.parent = node
+	}
+	node.parent = pivot
+	pivot.right = node
+}
+
 func (t *rb[K, V]) Delete(key K) (ok bool) {
 	if t.root == nil {
 		return
