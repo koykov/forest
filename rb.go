@@ -40,12 +40,30 @@ func (t *rb[K, V]) Insert(key K, value V) {
 		t.size++
 		return
 	}
-	t.root = t.insert(t.root, key, value)
-}
 
-func (t *rb[K, V]) insert(node *nodeRB[K, V], key K, value V) *nodeRB[K, V] {
-	// todo implement me
-	return nil
+	node := t.root
+	defer t.rebalance(node)
+	for {
+		switch {
+		case key == node.key:
+			node.value = value
+			return
+		case key < node.key:
+			if node.left == nil {
+				node.left = t.alloc(key, value)
+				t.size++
+				return
+			}
+			node = node.left
+		default:
+			if node.right == nil {
+				node.right = t.alloc(key, value)
+				t.size++
+				return
+			}
+			node = node.right
+		}
+	}
 }
 
 func (t *rb[K, V]) grandparent(node *nodeRB[K, V]) *nodeRB[K, V] {

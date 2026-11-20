@@ -1,35 +1,35 @@
 package forest
 
-func (t *rb[K, V]) insert1(node *nodeRB[K, V]) {
+func (t *rb[K, V]) rebalance(node *nodeRB[K, V]) {
 	if node.parent == nil {
 		node.color = rbBlack
 	} else {
-		t.insert2(node)
+		t.rebalance2(node)
 	}
 }
 
-func (t *rb[K, V]) insert2(node *nodeRB[K, V]) {
+func (t *rb[K, V]) rebalance2(node *nodeRB[K, V]) {
 	if node.parent.color == rbBlack {
 		return
 	}
-	t.insert3(node)
+	t.rebalance3(node)
 }
 
-func (t *rb[K, V]) insert3(node *nodeRB[K, V]) {
+func (t *rb[K, V]) rebalance3(node *nodeRB[K, V]) {
 	u := t.uncle(node)
 	if u != nil && u.color == rbRed {
 		node.parent.color = rbBlack
 		u.color = rbBlack
 		if g := t.grandparent(node); g != nil {
 			g.color = rbRed
-			t.insert1(node)
+			t.rebalance(node)
 		}
 	} else {
-		t.insert4(node)
+		t.rebalance4(node)
 	}
 }
 
-func (t *rb[K, V]) insert4(node *nodeRB[K, V]) {
+func (t *rb[K, V]) rebalance4(node *nodeRB[K, V]) {
 	g := t.grandparent(node)
 	if g == nil {
 		return
@@ -40,10 +40,10 @@ func (t *rb[K, V]) insert4(node *nodeRB[K, V]) {
 	case node.parent.left == node && node.parent == g.right:
 		node = node.right
 	}
-	t.insert5(node)
+	t.rebalance5(node)
 }
 
-func (t *rb[K, V]) insert5(node *nodeRB[K, V]) {
+func (t *rb[K, V]) rebalance5(node *nodeRB[K, V]) {
 	g := t.grandparent(node)
 	if g == nil {
 		return
